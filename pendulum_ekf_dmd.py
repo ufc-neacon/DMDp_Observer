@@ -14,12 +14,6 @@ font = {'family' : 'Times New Roman',
         'usetex' : 'true',
         'size'   : 16}
 
-# mpl.rc('font', **font)
-# plt.rcParams.update({
-#     "text.usetex": True,
-#     "font.family": "Times",
-#     "font.sans-serif": "Times",
-# })
 
 # Plotting
 font = {'family' : 'Times New Roman',
@@ -195,63 +189,10 @@ x =  np.array([
     [x2**2*x1]
 ])
 
-# f = A @ x + B * 0
-
-# lam, vec = np.linalg.eigh(Q)
-
-# prog, eps = sospolymatrixvar(prog, monomials(vartable,[0]), [2, 1])
-# prog, sigma = sospolymatrixvar(prog, monomials(vartable,[0]), [1, 1])
-
-# g = np.vstack((f,eps))
-# # eq = g.T @ Q @ g - 1/np.linalg.norm(lam, 2)
-# eq = g.T @ Q @ g - sigma
-
-# Ip2 = np.eye(2)
-# prog = sosmatrixineq(prog, -eq)
-# prog = sossolve(prog)
-# eps2 = np.double(sosgetsol(prog, eps))
-# sigma = np.double(sosgetsol(prog, sigma))
-# eps=sigma
-# print(eps)
-# #print(np.mean(abs(YY-yrr)))
-# # bound = (eps[0,0]**2 + 2*eps[0,0]*eps[1,0] + eps[1,0]**2)
 bound = np.abs(np.sum(Ba.T@Q[:2,:2]@Ba)+np.sum(Aa.T@Q[2:,2:]@Aa))#np.trace(Q)#sigma
 print(bound)
 xbound = bound#abs(eps[0,0])*np.ones(len(XX))
 ybound = bound#abs(eps[1,0])*np.ones(len(YY))
-
-# fig = plt.figure(figsize=(10, 6))
-# ax = plt.subplot(111) #whole path
-# ax.plot(XX, YY, label='Proposed Observer', color='blue', linestyle='-', linewidth=2)
-# ax.plot(xV[:-2,0], xV[:-2,1], color='orange', linestyle='--',label='Real', linewidth=2)
-# ax.plot(xV[:-2,0]*(1 + bound), xV[:-2,1]*(1 + bound), color='red', linestyle='-.', label='Upper bound', linewidth=2)
-# ax.plot(xV[:-2,0]*(1 - bound), xV[:-2,1]*(1 - bound), color='red', linestyle='-.', label='Lower bound', linewidth=2)
-# ax.set_xlim(-0.00165, 0.002)
-# ax.grid(True)
-# ax.legend()
-# ax.set_xlabel('$x_1$ state (position)')
-# ax.set_ylabel('$x_2$ state (angle)')
-# ax.set_title('Phase portrait')
-
-# axins = zoomed_inset_axes(ax, 350, loc='center right')
-# axins.plot(XX, YY, label='Proposed Observer', color='blue', linestyle='-', linewidth=2)
-# axins.plot(xV[:-2,0], xV[:-2,1], color='orange', linestyle='--',label='Real', linewidth=2)
-# axins.plot(xV[:-2,0]*(1 + bound), xV[:-2,1]*(1 + bound), color='red', linestyle='-.', label='Upper bound', linewidth=2)
-# axins.plot(xV[:-2,0]*(1 - bound), xV[:-2,1]*(1 - bound), color='red', linestyle='-.', label='Lower bound', linewidth=2)
-
-# axins.set_xlim(-0.000800, -0.000795)
-# axins.set_ylim(0.9940, 0.9943)
-# axins.grid(True)
-
-# # axins.set_xlim(-0.0001, 0.0001)
-# # axins.set_ylim(-0.05, 0.05)
-# # axins.grid(True)
-
-# pp,p1,p2 = mark_inset(ax,axins,loc1=1,loc2=3)
-# pp.set_fill(True)
-# pp.set_facecolor("lightgray")
-# pp.set_edgecolor("k")
-# fig.savefig('phase portrait.eps', format='eps')
 
 
 """ plt.figure(figsize=(10, 6))
