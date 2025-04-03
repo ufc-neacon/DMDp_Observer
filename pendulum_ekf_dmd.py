@@ -229,12 +229,6 @@ plt.grid(True)
 plt.subplot(2, 1, 2)  # Creating a subplot with 2 rows, 1 column, and select the second subplot
 plt.plot(time[:-1],[(y - yr) for y, yr in zip(YY, yr)], 'b', linewidth=2, label='Proposed Polynomial Approximation')
 plt.plot(time[:-1],bound*np.ones(len(yr)), color='red', linestyle='-.', linewidth=2, label='$\sigma$')
-# plt.plot(time[:-2],[(y - yr) for y, yr in zip(YY, yr-bound)], color='red', linestyle='-.', linewidth=2, label='Lower Bound')
-# plt.annotate('mean error = $8.51\cdot10^{-8}$', xy = (0.0035, 0.00005), 
-#              fontsize = 16, xytext = (0.004, 0.0004), 
-#              arrowprops = dict(facecolor = 'green'),
-#              color = 'k')
-#plt.legend(fancybox=True, framealpha=0.5,loc='lower right')
 plt.legend(fancybox=True, loc='right')
 plt.xlabel('Time',fontsize = 16)
 plt.title('Output (angle) error')
@@ -242,7 +236,7 @@ plt.grid(True)
 plt.tight_layout()
 plt.savefig('x2.eps')
 
-e_x1=XX_sob-xr
+""" e_x1=XX_sob-xr
 e_x2=YY_sob-yr
 print('erro obs x1: ',np.mean(e_x1))
 print('erro obs x2: ',np.mean(e_x2))
@@ -253,7 +247,7 @@ plt.plot(time[:-1],YY_sob-yr, color='orange', linestyle='--', label='$x_2$ state
 # plt.plot(time[:-2],[(x - xr) for x, xr in zip(XX, xr-bound)], color='red', linestyle='-.', linewidth=2, label='Lower Bound')
 plt.grid()
 plt.legend()
-plt.savefig('Observer.eps')
+plt.savefig('Observer.eps') """
 
 # Função modelo discreto do pêndulo
 def pendulum_model(v, t, u):
