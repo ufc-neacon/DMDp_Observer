@@ -9,7 +9,9 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes,mark_inset
 
 import matplotlib as mpl
 
-######################### FONT DEFINITIONS ###################################
+#############################################################################
+#                       FONT DEFINITION FOR PLOTTING 
+#############################################################################
 
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
@@ -21,7 +23,9 @@ rc = {"font.family" : "serif",
 plt.rcParams.update(rc)
 plt.rcParams["font.serif"] = ["Times New Roman"] + plt.rcParams["font.serif"]
 
-######################### PENDULUM RELATED FUNCTIONS ##########################
+#############################################################################
+#                       PENDULUM RELATED FUNCTIONS
+#############################################################################
 
 def pendulum(v, t, u):
     x, y = v
@@ -48,6 +52,10 @@ def system(x, xss, u):
     xs = ode2[-1]
     return _x, xs
 
+#############################################################################
+#                       INPUT AND STATE DEFINITIONS
+#############################################################################
+
 # Initial conditions
 x0 = 0
 y0 = 0
@@ -60,8 +68,6 @@ t = np.arange(100000)
 dec=2500
 ruidox1=[]
 ruidox2=[]
-
-###################### INPUT AND STATE DEFINITIONS ################################
 
 for i in t:     
     u = (-0.5*dec* np.cos(2 * np.pi * i / dec)) # Computes input u
@@ -76,16 +82,19 @@ xVV = np.vstack(xVV)
 time = np.arange(0,1e-1,1e-6)
 time = time[0:-2]
 
+#############################################################################
+#              DMD ALGORITHM FOR POLYNOMIAL APPROXIMATION: DMDp 
+#############################################################################
+
 u = uV[:-1]
 x0 = xV[:-1, :]
 x1 = xV[1:, :]
 
-H = lambda x: [x[:,0], x[:,1], x[:,0]**2, x[:,1]**2, x[:,0]*x[:,1], x[:,0]**2*x[:,1], x[:,0]*x[:,1]**2]
+H = lambda x: [x[:,0], x[:,1], x[:,0]**2, x[:,1]**2, x[:,0]*x[:,1], x[:,0]**2*x[:,1], x[:,0]*x[:,1]**2] # set of monomials definition
 H0 = np.array(H(x0))
-
 W0 = np.array([u])
 
-sx = np.dot(x1.T, np.linalg.pinv(np.vstack([W0, H0])))
+sx = np.dot(x1.T, np.linalg.pinv(np.vstack([W0, H0]))) # The effective dmd operation
 
 A = sx[:,1:]
 B = sx[:,:1]
@@ -109,9 +118,11 @@ yr = xV[2:,1]
 yrr = xVV[2:,1]
 YY = X[1:,1]
 
-###################### POLYNOMIAL OBSERVER ################################
+#############################################################################
+#               POLYNOMIAL OBSERVER BASED ON THE ABOVE DMDp
+#############################################################################
 
-Kpol = np.array([0.35,0.95])
+Kpol = np.array([0.35,0.95])                # Observer gain
 Sob = lambda u, x, ee: B * u + np.dot(A, np.array([[x[0], x[1], x[0]**2, x[1]**2, x[0]*x[1], x[0]**2*x[1], x[0]*x[1]**2 ]]).T) + Kpol@ee.T #(xV[2:,1]-X[2:,1])
 
 X_sob = []
@@ -128,6 +139,10 @@ X_sob = np.array(X_sob)
 
 XX_sob = X_sob[1:,0]
 YY_sob = X_sob[1:,1]
+
+#############################################################################
+#         POLYNOMIAL APPROXIMATION ANALYSIS OF THE DMDp APPROACH
+#############################################################################
 
 options = {}
 options['solver'] = 'cvxopt'
@@ -189,6 +204,10 @@ print(bound)
 xbound = bound
 ybound = bound
 
+#############################################################################
+#                              PLOTTING AREA
+#############################################################################
+
 plt.figure(figsize=(10, 6))
 plt.subplot(2, 1, 1)  
 plt.plot(time[:-1],XX, 'b', label='Proposed Polynomial Approximation', linewidth=2)
@@ -238,7 +257,13 @@ plt.grid()
 plt.legend()
 plt.savefig('Observer.eps') """
 
+#############################################################################
+#--------------------- EXTENDED KALMAN FILTER OBSERVER ----------------------
+#############################################################################
 
+#############################################################################
+#                       PENDULUM RELATED FUNCTIONS
+#############################################################################
 def pendulum_model(v, t, u):
     x, y = v
 
@@ -253,7 +278,7 @@ def pendulum_model(v, t, u):
 
     return np.array([dxdt, dydt])
 
-# Define the system of differential equations including input u
+# Define the system of differential equations with Ts=1e-6 including input u
 def pendulum_model_discrete(x, u):
 
     # Solve ODE
@@ -271,7 +296,7 @@ def jacobian_pendulum(xk, uk):
     f_y_plus = pendulum_model_discrete(xk + np.array([0, epsilon]), uk)
     f_y_minus = pendulum_model_discrete(xk - np.array([0, epsilon]), uk)
     
-    # Calculando a Jacobiana (derivadas parciais)
+    # Computing the partials
     jacobian_matrix = np.array([
         [(f_x_plus[0] - f_x_minus[0]) / (2 * epsilon), (f_x_plus[0] - f_x_minus[0]) / (2 * epsilon)],  # Derivadas parciais de x e y em relação a x
         [(f_y_plus[0] - f_y_minus[0]) / (2 * epsilon), (f_y_plus[1] - f_y_minus[1]) / (2 * epsilon)]   # Derivadas parciais de x e y em relação a y
@@ -313,7 +338,7 @@ erro_medio_T = []
 
 ekf = EKF(f_model=pendulum_model_discrete, jacobian_f=jacobian_pendulum)
 
-# Loop de simulação
+# Simulation loop
 for i in Ta:
     u = (-0.5*2500* np.cos(2 * np.pi * i / 2500))   # Plant input
     x_real = pendulum_model_discrete(x_real, u)     # State of the plant
@@ -337,9 +362,13 @@ xT_est = np.array(xT_est)
 print(xT_real.shape)
 print(xT_est.shape)
 
-# Error plotting
+# Errors
 e_2_x = xT_real[:, 0] - xT_est[:, 0]  # Position error
 e_2_y = xT_real[:, 1] - xT_est[:, 1]  # Angle error
+
+#############################################################################
+#                               PLOTTING AREA
+#############################################################################
 
 time = np.arange(0,1e-1,1e-6)
 time = time[0:-40001]
