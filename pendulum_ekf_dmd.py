@@ -9,13 +9,8 @@ from mpl_toolkits.axes_grid1.inset_locator import zoomed_inset_axes,mark_inset
 
 import matplotlib as mpl
 
-font = {'family' : 'Times New Roman',
-        'weight' : 'normal',
-        'usetex' : 'true',
-        'size'   : 16}
+######################### FONT DEFINITIONS ###################################
 
-
-# Plotting
 font = {'family' : 'Times New Roman',
         'weight' : 'normal',
         'size'   : 12}
@@ -26,6 +21,7 @@ rc = {"font.family" : "serif",
 plt.rcParams.update(rc)
 plt.rcParams["font.serif"] = ["Times New Roman"] + plt.rcParams["font.serif"]
 
+######################### PENDULUM RELATED FUNCTIONS ##########################
 
 def pendulum(v, t, u):
     x, y = v
@@ -41,7 +37,7 @@ def pendulum(v, t, u):
 
     return [dxdt, dydt]
 
-# Define the system of differential equations including input u
+# Define the system of differential equations with Ts=1e-6 including input u
 def system(x, xss, u):
 
     # Solve ODE
@@ -64,14 +60,13 @@ t = np.arange(100000)
 dec=2500
 ruidox1=[]
 ruidox2=[]
+
+###################### INPUT AND STATE DEFINITIONS ################################
+
 for i in t:     
-    u = (-0.5*dec* np.cos(2 * np.pi * i / dec)) # Calcula a entrada
+    u = (-0.5*dec* np.cos(2 * np.pi * i / dec)) # Computes input u
     x,xs = system(x, xs, u)
-    rx1=0*1e-7*(random.random()-0.5)
-    rx2=0*1e-8*(random.random()-0.5)
-    ruidox1.append(rx1)
-    ruidox2.append(rx2)
-    xV.append(x + np.array([rx1,rx2]))
+    xV.append(x)
     xVV.append(xs)
     uV.append(u)
 
@@ -114,12 +109,13 @@ yr = xV[2:,1]
 yrr = xVV[2:,1]
 YY = X[1:,1]
 
-Kpol = np.array([0.35,0.95])
+###################### POLYNOMIAL OBSERVER ################################
 
+Kpol = np.array([0.35,0.95])
 Sob = lambda u, x, ee: B * u + np.dot(A, np.array([[x[0], x[1], x[0]**2, x[1]**2, x[0]*x[1], x[0]**2*x[1], x[0]*x[1]**2 ]]).T) + Kpol@ee.T #(xV[2:,1]-X[2:,1])
 
 X_sob = []
-x0_sob = np.array([0.25,-0.25]) #xV[0,:]
+x0_sob = np.array([0.25,-0.25])
 
 
 for i in t[:-1]:
@@ -197,7 +193,7 @@ plt.figure(figsize=(10, 6))
 plt.subplot(2, 1, 1)  
 plt.plot(time[:-1],XX, 'b', label='Proposed Polynomial Approximation', linewidth=2)
 plt.plot(time[:-1],xr, color='orange', linestyle='--', label='Real', linewidth=2)
-plt.legend()
+plt.legend(fancybox=True, loc='right')
 plt.title('$x_1$ state (position)')#,**csfont)
 plt.ylabel('$x_1$ state (position)',fontsize = 16)
 plt.grid(True)
@@ -242,7 +238,7 @@ plt.grid()
 plt.legend()
 plt.savefig('Observer.eps') """
 
-# Função modelo discreto do pêndulo
+
 def pendulum_model(v, t, u):
     x, y = v
 
@@ -266,7 +262,7 @@ def pendulum_model_discrete(x, u):
     _x = ode1[-1] 
     return _x
 
-# Função Jacobiana do pêndulo
+# Pendulum Jacobian function
 def jacobian_pendulum(xk, uk):
     epsilon = 1e-5
     f_x_plus = pendulum_model_discrete(xk + np.array([epsilon, 0]), uk)
@@ -283,32 +279,32 @@ def jacobian_pendulum(xk, uk):
     
     return jacobian_matrix
 
-# Classe EKF
+# EKF
 class EKF:
     def __init__(self, f_model, jacobian_f, P0=0.1):
-        self.P = np.array([[P0, 0], [0, P0]])  # Covariância inicial (para 2 estados)
-        self.f_model = f_model  # Função de predição do modelo
-        self.jacobian_f = jacobian_f  # Função Jacobiana
+        self.P = np.array([[P0, 0], [0, P0]])   # Initial covariation (2 states)
+        self.f_model = f_model                  # Model prediction
+        self.jacobian_f = jacobian_f            # Jacobian function
     
     def step(self, x_prev, u, y_measured, Q, R):
-        F = self.jacobian_f(x_prev, u)  # Jacobiana
-        x_pred = self.f_model(x_prev, u)  # Estado previsto
-        P_pred = F @ self.P @ F.T + Q  # Atualização da covariância
+        F = self.jacobian_f(x_prev, u)          # Jacobian
+        x_pred = self.f_model(x_prev, u)        # Prediction
+        P_pred = F @ self.P @ F.T + Q           # Covariance update
 
-        H = np.array([[1, 0], [0, 1]])  # Matriz de observação (identidade para 2 estados)
-        S = H @ P_pred @ H.T + R  # Inovação
-        K = P_pred @ H.T @ np.linalg.inv(np.array(S))  # Ganho de Kalman
-        x_est = x_pred + K @ (y_measured - H @ x_pred)  # Atualiza a estimativa
-        P_est = (np.eye(2) - K @ H) @ P_pred  # Atualiza a covariância
+        H = np.array([[1, 0], [0, 1]])          # Observation matrix (identity for 2 states)
+        S = H @ P_pred @ H.T + R                # Inovation
+        K = P_pred @ H.T @ np.linalg.inv(np.array(S))   # Kalman Gain
+        x_est = x_pred + K @ (y_measured - H @ x_pred)  # Estimation update
+        P_est = (np.eye(2) - K @ H) @ P_pred            # Covariance update
         
-        self.P = P_est  # Atualiza a covariância para o próximo passo
-        return x_est  # Retorna o estado estimado
+        self.P = P_est                          # Next step covariance
+        return x_est                            # Retorns the estimated state
 
-# Parâmetros da simulação
+# Simulation Parameters
 Ta = np.arange(100000)
 
-x_real = np.array([0, 0])  # Posição e velocidade iniciais
-x_est = np.array([0.25,-0.25])  # Estimativa inicial
+x_real = np.array([0, 0])       # Initial position and velocity
+x_est = np.array([0.25,-0.25])  # Initial estimation
 xT_real = [x_real]
 xT_est = [x_est]
 uT = []
@@ -319,31 +315,31 @@ ekf = EKF(f_model=pendulum_model_discrete, jacobian_f=jacobian_pendulum)
 
 # Loop de simulação
 for i in Ta:
-    u = (-0.5*2500* np.cos(2 * np.pi * i / 2500))   # Entrada de controle
-    x_real = pendulum_model_discrete(x_real, u)  # Estado real
-    eta = 1e-2 * (np.random.rand(2) - 0.5)  # Ruído
-    y_measured = x_real + eta  # Medições com ruído
+    u = (-0.5*2500* np.cos(2 * np.pi * i / 2500))   # Plant input
+    x_real = pendulum_model_discrete(x_real, u)     # State of the plant
+    eta = 1e-2 * (np.random.rand(2) - 0.5)          # Noise
+    y_measured = x_real + eta                       # Noisy measurements
     
     ruido.append(eta)
     xT_real.append(x_real)
     uT.append(u)
     
-    R_est = 2e0  # Estimativa de variância do ruído de medição
-    Q_est = 1e-3  # Estimativa de variância do ruído de processo
+    R_est = 2e0     # Input noise (EKF parameter)
+    Q_est = 1e-3    # State noise (EKF parameter)
     
-    x_est = ekf.step(x_est, u, x_real, Q_est, R_est)  # Atualiza a estimativa
+    x_est = ekf.step(x_est, u, x_real, Q_est, R_est)  # State update
     xT_est.append(x_est)
 
-# Resultados
+# Results
 xT_real = np.array(xT_real)
 xT_est = np.array(xT_est)
 
 print(xT_real.shape)
 print(xT_est.shape)
 
-# Plotando o erro
-e_2_x = xT_real[:, 0] - xT_est[:, 0]  # Erro de posição
-e_2_y = xT_real[:, 1] - xT_est[:, 1]  # Erro de angulo
+# Error plotting
+e_2_x = xT_real[:, 0] - xT_est[:, 0]  # Position error
+e_2_y = xT_real[:, 1] - xT_est[:, 1]  # Angle error
 
 time = np.arange(0,1e-1,1e-6)
 time = time[0:-40001]
