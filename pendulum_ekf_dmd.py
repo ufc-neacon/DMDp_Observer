@@ -114,9 +114,9 @@ yr = xV[2:,1]
 yrr = xVV[2:,1]
 YY = X[1:,1]
 
-Qs = np.array([0.95,0.95])
+Kpol = np.array([0.35,0.95])
 
-Sob = lambda u, x, ee: B * u + np.dot(A, np.array([[x[0], x[1], x[0]**2, x[1]**2, x[0]*x[1], x[0]**2*x[1], x[0]*x[1]**2 ]]).T) + Qs@ee.T #(xV[2:,1]-X[2:,1])
+Sob = lambda u, x, ee: B * u + np.dot(A, np.array([[x[0], x[1], x[0]**2, x[1]**2, x[0]*x[1], x[0]**2*x[1], x[0]*x[1]**2 ]]).T) + Kpol@ee.T #(xV[2:,1]-X[2:,1])
 
 X_sob = []
 x0_sob = np.array([0.25,-0.25]) #xV[0,:]
@@ -148,7 +148,6 @@ for j in lvar:
     for i in cvar:
         sx[j,i] = '{:.2g}'.format(sx[j,i])
     
-# eps = 0.11e-9
 eps = 0.11e-9
 Ip = np.eye(8)
 S = sx
@@ -191,38 +190,32 @@ x =  np.array([
 
 bound = np.abs(np.sum(Ba.T@Q[:2,:2]@Ba)+np.sum(Aa.T@Q[2:,2:]@Aa))#np.trace(Q)#sigma
 print(bound)
-xbound = bound#abs(eps[0,0])*np.ones(len(XX))
-ybound = bound#abs(eps[1,0])*np.ones(len(YY))
+xbound = bound
+ybound = bound
 
-
-""" plt.figure(figsize=(10, 6))
+plt.figure(figsize=(10, 6))
 plt.subplot(2, 1, 1)  
 plt.plot(time[:-1],XX, 'b', label='Proposed Polynomial Approximation', linewidth=2)
 plt.plot(time[:-1],xr, color='orange', linestyle='--', label='Real', linewidth=2)
-#plt.legend()
+plt.legend()
 plt.title('$x_1$ state (position)')#,**csfont)
 plt.ylabel('$x_1$ state (position)',fontsize = 16)
 plt.grid(True)
 plt.subplot(2, 1, 2)  
 plt.plot(time[:-1],[(x - xr) for x, xr in zip(XX, xr)], 'b', linewidth=2, label='Proposed Polynomial Approximation')
 plt.plot(time[:-1],bound*np.ones(len(xr)), color='red', linestyle='-.', linewidth=2, label='$\sigma$')
-# plt.plot(time[:-2],[(x - xr) for x, xr in zip(XX, xr-bound)], color='red', linestyle='-.', linewidth=2, label='Lower Bound')
-# plt.annotate('mean error = $4.26\cdot10^{-10}$', xy = (0.0035, 0.00005), 
-#              fontsize = 16, xytext = (0.004, 0.0004), 
-#              arrowprops = dict(facecolor = 'green'),
-#              color = 'k')
 plt.legend(fancybox=True, loc='right')#, framealpha=0.1)
-plt.xlabel('Time',fontsize = 16)
+plt.xlabel('Time (s)',fontsize = 16)
 plt.title('Output (position) error')
 plt.grid(True)
 plt.tight_layout()
-plt.savefig('x1.eps') """
+plt.savefig('x1.eps')
 
 plt.figure(figsize=(10, 6))
 plt.subplot(2, 1, 1)  # Creating a subplot with 2 rows, 1 column, and select the first subplot
 plt.plot(time[:-1], YY,'b', label='Proposed Polynomial Approximation', linewidth=2)
 plt.plot(time[:-1], yr, color='orange', linestyle='--', label='Real', linewidth=2)
-#plt.legend()
+plt.legend(fancybox=True, loc='right')
 plt.title('$x_2$ state (angle)')
 plt.ylabel('$x_2$ state (angle)',fontsize = 16)
 plt.grid(True)
@@ -230,7 +223,7 @@ plt.subplot(2, 1, 2)  # Creating a subplot with 2 rows, 1 column, and select the
 plt.plot(time[:-1],[(y - yr) for y, yr in zip(YY, yr)], 'b', linewidth=2, label='Proposed Polynomial Approximation')
 plt.plot(time[:-1],bound*np.ones(len(yr)), color='red', linestyle='-.', linewidth=2, label='$\sigma$')
 plt.legend(fancybox=True, loc='right')
-plt.xlabel('Time',fontsize = 16)
+plt.xlabel('Time (s)',fontsize = 16)
 plt.title('Output (angle) error')
 plt.grid(True)
 plt.tight_layout()
@@ -355,12 +348,12 @@ e_2_y = xT_real[:, 1] - xT_est[:, 1]  # Erro de angulo
 time = np.arange(0,1e-1,1e-6)
 time = time[0:-40001]
 
-plt.figure()
+plt.figure(figsize=(10, 6))
 plt.plot(time,XX_sob[:-39998]-xr[:-39998], color='blue', label= 'Proposed: $x_1$ (position)', linewidth=3)
 plt.plot(time,YY_sob[:-39998]-yr[:-39998], color='cyan', linestyle='--', label='Proposed: $x_2$ (angle)', linewidth=3)
 plt.plot(time, e_2_x[:-40001], label='EKF: $x_1$ (position)', color="orange",linewidth=2)
 plt.plot(time, e_2_y[:-40001], label='EKF: $x_2$ (angle)', linestyle="dashed", color="red",linewidth=2)
-plt.xlabel("Time")
+plt.xlabel("Time (s)")
 plt.ylabel("Absolute value")
 plt.title("State error convergence")
 plt.grid()
