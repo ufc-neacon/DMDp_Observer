@@ -299,7 +299,7 @@ sigma = np.double(sosgetsol(prog, sigma))
 eps=sigma
 print('raio = ', eps)
 
-# ####### Plot obtained w bounds #######
+# ####### Print obtained w bounds #######
 Ba = S[0,:]
 Aa = S[1,:]
 bound = np.abs(np.sum(Ba*Q[0,0]*Ba.T)+np.sum(Aa*Q[1,1]*Aa.T)) #np.abs(np.trace(Q))
