@@ -49,19 +49,21 @@ File->tank_EKFvsDMDp.py
     Execution Order: ✅ Run this script last, after both tank_EKF_example.py and tank_polynomial_example.py.
 
 
+✅ Recommended Execution Flow
 
+    Run EKF simulation:
 
-✅ Recommended Execution FlowRun EKF simulation:
+->python tank_EKF_example.py
 
-python tank_EKF_example.py
+   Run Polynomial vs. DMDc simulation:
 
-Run Polynomial vs. DMDc simulation:
-
-python tank_polynomial_example.py
+->python tank_polynomial_example.py
 
 Run full comparison between EKF, DMDc, and the proposed method:
 
-python tank_EKFvsDMDp.py
+    ->python tank_EKFvsDMDp.py
+
+
 
 📌 Notes
 
