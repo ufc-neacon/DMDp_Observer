@@ -1,3 +1,24 @@
+# tank_polynomial_example.py
+
+# This script implements and performs a comparative analysis between the proposed polynomial-based method and the Dynamic Mode Decomposition.
+# Functionality:
+
+#     Implements the polynomial modeling method described in the project.
+
+#     Compares the model's predictive performance against DMDc.
+
+#     Plots the simulation results, highlighting the error between the proposed method and DMDc.
+
+#     Saves the generated data to enable subsequent comparison with the Extended Kalman Filter (EKF) implementation (tank_EKF_example.py).
+
+# Usage Notes:
+
+# Make sure this script is executed after running the tank_EKF_example.py script if you plan to include EKF in the performance comparison.
+
+
+
+
+
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
@@ -74,13 +95,13 @@ def DMDp(xOLHistory, uOLHistory, mtype):
 
         Zo = Z(X0)
 
-        # W(x) polinômio
+        # W(x) polinôm
         W = lambda x: 1
 
         # Signal Wo
         Wo = W(X0) * U
 
-        # Certifique-se de que Wo e Zo são arrays NumPy com tipo de dados numéricos
+        # make sure that Wo e Zo are numeric NumPy 
         Wo = np.asarray(Wo, dtype=float)
         Zo = np.asarray(Zo, dtype=float)
         X0 = np.asarray([X0], dtype=float)
@@ -136,7 +157,7 @@ def DMDp(xOLHistory, uOLHistory, mtype):
 
 
 
-deg = 7   # Desired polynomial degree.
+deg = 5   # Desired polynomial degree.
 Ts = 1    #sampleTime
 Duration = 20000 #total Simulation duration.
 cko = 0.6   #Physical parametric constants of the reservoir.
@@ -302,15 +323,24 @@ print('raio = ', eps)
 # ####### Print obtained w bounds #######
 Ba = S[0,:]
 Aa = S[1,:]
-bound = np.abs(np.sum(Ba*Q[0,0]*Ba.T)+np.sum(Aa*Q[1,1]*Aa.T)) #np.abs(np.trace(Q))
+bound = np.abs(np.sum(Ba*Q[0,0]*Ba.T)+np.sum(Aa*Q[1,1]*Aa.T)) 
 print(bound)
 
 print('Erro Modelo DMDp:', np.max(np.abs(xT[:-1] - xDMDp[:-1])))
 print('Erro Modelo DMDc:', max(np.abs(xT - xDMDp_1)))
 
+Aprox_DMDp_er=[np.abs((x - xr)) for x, xr in zip(xDMDp, xT)]
+Aprox_DMDc_er=[np.abs((x - xr)) for x, xr in zip(xDMDp_1, xT)]
+
+
 xDMDp = xDMDp[:-1]
 xDMDp_1 = xDMDp_1[:-1]
 xT = xT[:-1]
+
+
+
+
+
 
 
 plt.close('all')
@@ -364,7 +394,16 @@ plt.savefig("FIG_7.png", dpi=300, bbox_inches='tight')
 plt.show()
 plt.close('all')
 
-
-
+#______________________________________________________________________________________________
+#Save Proposed and DMDc data to allow direct comparison with the proposed method
+#Available in tank_EKF_example.py"
+np.save('xT_est_DMDp_data.npy', xDMDp)
+np.save('Aprox_DMDp_er_data.npy', Aprox_DMDp_er)
+np.save('xT_est_DMDc_data.npy', xDMDp_1)
+np.save('Aprox_DMDc_er_data.npy', Aprox_DMDc_er)
+np.save('bound_last', bound)
+np.save('deg_last', deg)
+np.save('xT_real_data.npy', xT)
+np.save('e_2_data.npy', e_2)
 
 
