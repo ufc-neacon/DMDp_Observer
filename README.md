@@ -51,7 +51,10 @@ File->tank_EKFvsDMDp.py
 
 ✅ Recommended Execution Flow
 
-    Run EKF simulation
+
+
+
+Run EKF simulation
 
 ->python tank_EKF_example.py
 
@@ -59,9 +62,12 @@ File->tank_EKFvsDMDp.py
 
 ->python tank_polynomial_example.py
 
-   Run full comparison between EKF, DMDc, and the proposed method:
+   Run full comparison between EKF, DMDc, and the proposed method: 
+   
+->pyton tank_EKFvsDMDp.py
 
-    ->python tank_EKFvsDMDp.py
+
+
 
 
 
